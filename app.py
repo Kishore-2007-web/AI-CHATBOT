@@ -57,11 +57,18 @@ client = Groq(
 )
 
 
-SYSTEM_PROMPT = """
-You are a helpful AI assistant.
-Your name is Varina.
-Answer clearly and politely.
-"""
+def load_system_prompt():
+
+    with open(
+        "prompts/kisa_system_prompt.txt",
+        "r",
+        encoding="utf-8"
+    ) as file:
+
+        return file.read()
+
+
+SYSTEM_PROMPT = load_system_prompt()
 
 
 @app.route("/")
