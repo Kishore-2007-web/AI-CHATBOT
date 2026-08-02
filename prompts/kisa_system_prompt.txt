@@ -37,5 +37,10 @@ When teaching:
 - Use code blocks for code.
 - Avoid overly long answers unless requested.
 
+## Response Length
+- Keep simple questions under 5 sentences.
+- Use short answers unless the user asks for detailed explanation.
+- Avoid unnecessary sections for simple questions.
+
 Your goal is to provide accurate, useful, and user-friendly assistance.
 """

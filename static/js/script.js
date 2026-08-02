@@ -1,30 +1,3 @@
-/*const button = document.getElementById("send-btn");
-
-const input = document.getElementById("user-input");
-
-const chatBox = document.getElementById("chat-box");
-
-
-button.addEventListener("click", () => {
-
-    const message = input.value;
-
-
-    if (message.trim() === "")
-        return;
-
-
-    const userMessage = document.createElement("div");
-
-    userMessage.innerHTML = "You: " + message;
-
-
-    chatBox.appendChild(userMessage);
-
-
-    input.value = "";
-
-});*/
 const button = document.getElementById("send-btn");
 
 const input = document.getElementById("user-input");
@@ -32,48 +5,124 @@ const input = document.getElementById("user-input");
 const chatBox = document.getElementById("chat-box");
 
 
-button.addEventListener("click", async () => {
+
+function addMessage(message, type) {
+
+    const div = document.createElement("div");
+
+    div.className = "message " + type;
+
+    div.innerHTML = marked.parse(message);
+
+    chatBox.appendChild(div);
 
 
-    const message = input.value;
+    chatBox.scrollTop = chatBox.scrollHeight;
+
+}
 
 
-    if (message.trim() === "")
+
+async function sendMessage() {
+
+
+    const message = input.value.trim();
+
+
+    if (message === "")
         return;
 
 
-
-    chatBox.innerHTML +=
-        `<div>You: ${message}</div>`;
+    addMessage(message, "user");
 
 
     input.value = "";
 
 
+    const loading = document.createElement("div");
 
-    const response = await fetch("/chat", {
+    loading.className = "message bot";
 
-        method: "POST",
+    loading.textContent = "Kisa is thinking...";
 
-        headers: {
-            "Content-Type": "application/json"
-        },
 
-        body: JSON.stringify({
-
-            message: message
-
-        })
-
-    });
+    chatBox.appendChild(loading);
 
 
 
-    const data = await response.json();
+    try {
+
+
+        const response = await fetch("/chat", {
+
+            method: "POST",
+
+            headers: {
+
+                "Content-Type": "application/json"
+
+            },
+
+            body: JSON.stringify({
+
+                message: message
+
+            })
+
+        });
 
 
 
-    chatBox.innerHTML +=
-        `<div>Bot: ${data.reply}</div>`;
+        const data = await response.json();
 
-});
+
+        loading.remove();
+
+
+
+        addMessage(
+            data.reply,
+            "bot"
+        );
+
+
+
+    }
+
+    catch (error) {
+
+
+        loading.remove();
+
+
+        addMessage(
+            "Something went wrong. Please try again.",
+            "bot"
+        );
+
+
+    }
+
+}
+
+
+
+button.addEventListener(
+    "click",
+    sendMessage
+);
+
+
+
+input.addEventListener(
+    "keypress",
+    function (event) {
+
+        if (event.key === "Enter") {
+
+            sendMessage();
+
+        }
+
+    }
+);

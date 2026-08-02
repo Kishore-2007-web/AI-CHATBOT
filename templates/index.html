@@ -14,18 +14,24 @@
 
     <div class="chat-container">
 
-        <h1>Welcome to Kisa AI</h1>
+        <div class="header">
+            <h1>Welcome to Kisa AI</h1>
+            <p>Your AI Assistant</p>
+        </div>
+
 
         <div id="chat-box">
-            <div class="bot-message">
-                Hello! I am your AI assistant. How can I help you today?
+
+            <div class="message bot">
+                Hello! How can I help you today?
             </div>
+
         </div>
 
 
         <div class="input-area">
 
-            <input id="user-input" type="text" placeholder="Type your message...">
+            <input id="user-input" type="text" placeholder="Message Kisa...">
 
             <button id="send-btn">
                 Send
@@ -36,7 +42,10 @@
     </div>
 
 
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
     <script src="/static/js/script.js"></script>
+
 
 </body>
 
