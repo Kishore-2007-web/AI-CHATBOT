@@ -9,8 +9,12 @@ __pycache__/
 venv/
 env/
 
-# Environment Variables
+# Environment Variables & Credentials
 .env
+firebase-key.json
+serviceAccountKey.json
+*-firebase-adminsdk-*.json
+secrets/
 
 # IDE
 .vscode/

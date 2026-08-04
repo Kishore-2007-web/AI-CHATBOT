@@ -4,9 +4,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>AI Chatbot</title>
-
+    <title>Kisa AI Chatbot</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/static/css/style.css">
 </head>
 
@@ -14,38 +16,73 @@
 
     <div class="chat-container">
 
+        <!-- Top Header Bar -->
         <div class="header">
-            <h1>Welcome to Kisa AI</h1>
-            <p>Your AI Assistant</p>
-        </div>
-
-
-        <div id="chat-box">
-
-            <div class="message bot">
-                Hello! How can I help you today?
+            <div class="header-brand">
+                <h1>Kisa AI</h1>
+                <span class="badge">v2.0</span>
             </div>
-
+            
+            <!-- User Profile Bar -->
+            <div id="user-profile-bar" class="user-profile hidden">
+                <span class="user-avatar">👤</span>
+                <span id="user-email-display" class="user-email">user@example.com</span>
+                <button id="logout-btn" class="btn-logout">Logout</button>
+            </div>
         </div>
 
+        <!-- Chat Output Messages Container -->
+        <div id="chat-box">
+            <div class="message bot">
+                Hello! I am <strong>Kisa</strong>, your AI Assistant powered by Groq and Firebase. Please sign in to start chatting!
+            </div>
+        </div>
 
+        <!-- Message Input Area -->
         <div class="input-area">
-
-            <input id="user-input" type="text" placeholder="Message Kisa...">
-
-            <button id="send-btn">
-                Send
-            </button>
-
+            <input id="user-input" type="text" placeholder="Please sign in to chat..." disabled>
+            <button id="send-btn" disabled>Send</button>
         </div>
 
     </div>
 
+    <!-- Auth Modal Overlay -->
+    <div id="auth-modal" class="modal-overlay">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h2 id="auth-title">Welcome Back</h2>
+                <p>Sign in to continue to Kisa AI</p>
+            </div>
 
+            <div id="auth-error" class="auth-error hidden"></div>
+
+            <form id="auth-form">
+                <div class="form-group">
+                    <label for="auth-email">Email Address</label>
+                    <input type="email" id="auth-email" placeholder="name@example.com" required autocomplete="email">
+                </div>
+
+                <div class="form-group">
+                    <label for="auth-password">Password</label>
+                    <input type="password" id="auth-password" placeholder="••••••••" required autocomplete="current-password">
+                </div>
+
+                <button type="submit" id="auth-submit-btn" class="btn-primary">Sign In</button>
+            </form>
+
+            <div class="modal-footer">
+                <p id="auth-toggle-btn">Don't have an account? <span class="link">Sign Up</span></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Markdown Parser -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
-    <script src="/static/js/script.js"></script>
-
+    <!-- ES6 Application Scripts -->
+    <script type="module" src="/static/js/firebase-config.js"></script>
+    <script type="module" src="/static/js/auth.js"></script>
+    <script type="module" src="/static/js/script.js"></script>
 
 </body>
 

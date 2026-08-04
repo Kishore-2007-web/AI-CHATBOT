@@ -1,45 +1,49 @@
-# AI Chatbot
+# AI Chatbot v2.0
 
-A beginner-friendly full-stack AI chatbot built to learn how a frontend, backend, and AI API work together.
+A production-style full-stack AI web application featuring **Firebase Authentication**, **Cloud Firestore Database**, **Python Flask**, and **Groq AI**.
 
-The project uses **HTML, CSS, JavaScript, Python, Flask, and the Groq API** to demonstrate the complete request-response lifecycle between a web browser and an AI model.
-
-> **Project Status:** 🚧 In Development (Version 0.1.0)
+> **Project Status:** 🚧 In Development (Version 2.0.0 - Phase 2: Firebase Authentication Complete)
 
 ---
 
 ## Project Goal
 
-The purpose of this project is to understand:
+The purpose of this project is to build a scalable, secure AI chat platform featuring:
 
-* Frontend development with HTML, CSS, and JavaScript
-* Backend development using Python and Flask
-* REST API communication
-* AI model integration using the Groq API
-* Professional software development workflow
-* Git and GitHub version control
-* Project documentation and organization
-
-This project is intended as a learning project and will gradually evolve into a feature-rich AI chatbot.
+* User Authentication (Email & Password via Firebase Auth)
+* Persistent Chat Database (Cloud Firestore)
+* Multi-conversation ChatGPT-style drawer & history management
+* Backend Security (Token verification & API key isolation)
+* Professional REST API communication (Python & Flask)
+* High-speed AI inference (Groq API with Llama 3.3 model)
 
 ---
 
 ## Features
 
-### Version 0.1.0
+### Version 2.0.0 (Phase 2 Complete)
 
-* Project initialization
-* Professional folder structure
-* Git & GitHub integration
-* Documentation setup
+* **Firebase Authentication UI**: Email & Password Sign Up, Login, and Logout modal interface
+* **Session Persistence**: Automatic login state observer (`onAuthStateChanged`)
+* **Token Security**: ID Token transmission via `Authorization: Bearer <idToken>` HTTP header
+* **Flask Protection**: `@require_auth` middleware verifying ID Tokens with Firebase Admin SDK
+* **Documentation**: Comprehensive auth guide (`docs/Authentication.md`)
 
-### Planned for Version 1.0.0
+### Version 2.0.0 (Phase 1 Complete)
 
-* AI chatbot interface
-* Flask backend
-* Groq AI integration
-* Send and receive messages
-* Responsive web interface
+* Firebase Admin SDK initialization in Flask backend
+* Secure credential configuration via environment variables
+* Git protection for Firebase service keys
+* Diagnostic `/api/health` status route
+* Firebase setup documentation (`docs/Firebase.md`)
+
+
+### Version 1.0.0
+
+* AI Chatbot interface (HTML/CSS/JS)
+* Flask REST backend with Groq API integration
+* Markdown rendering & loading indicators
+
 
 ---
 
