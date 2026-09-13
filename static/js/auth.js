@@ -138,16 +138,22 @@ onAuthStateChanged(auth, (user) => {
     }
 });
 
-// Helper: Get JWT ID Token for API requests
+// Helper: Get JWT ID Token for API requests (Guest Token Fallback)
 export async function getAuthToken() {
-    if (!currentUser) return null;
+    if (!currentUser) return "guest-token";
     try {
         return await currentUser.getIdToken();
     } catch (error) {
-        console.error("Failed to get ID token:", error);
-        return null;
+        console.error("Failed to get ID token, using guest fallback:", error);
+        return "guest-token";
     }
 }
+
+// Auto-initialize guest mode on page load
+document.addEventListener("DOMContentLoaded", () => {
+    fetchUserConversations();
+    fetchMemorySettings();
+});
 
 export function getCurrentUser() {
     return currentUser;

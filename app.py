@@ -13,7 +13,7 @@ load_dotenv()
 
 app = Flask(__name__)
 
-# Configurable limits
+GROQ_MODEL = os.environ.get("GROQ_MODEL", "groq/compound")
 RECENT_MESSAGE_LIMIT = 20
 SUMMARY_THRESHOLD = 10
 
@@ -37,26 +37,26 @@ else:
 # Instantiate Database Service
 db_service = DatabaseService(db)
 
-# Authentication Middleware Decorator
+# Authentication Middleware Decorator (Guest Mode Supported)
 def require_auth(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         auth_header = request.headers.get("Authorization")
-        if not auth_header or not auth_header.startswith("Bearer "):
-            return jsonify({"error": "Unauthorized: Missing or invalid Authorization token."}), 401
         
-        id_token = auth_header.split("Bearer ")[1].strip()
-        
-        if firebase_initialized:
-            try:
-                decoded_token = auth.verify_id_token(id_token)
-                g.user = decoded_token
-            except Exception as e:
-                print(f"[Auth Error] Token verification failed: {e}")
-                return jsonify({"error": "Unauthorized: Invalid or expired authentication token."}), 401
+        if auth_header and auth_header.startswith("Bearer "):
+            id_token = auth_header.split("Bearer ")[1].strip()
+            if id_token != "guest-token" and firebase_initialized:
+                try:
+                    decoded_token = auth.verify_id_token(id_token)
+                    g.user = decoded_token
+                except Exception as e:
+                    print(f"[Auth Notice] Token verification skipped/failed: {e}")
+                    g.user = {"uid": "guest-user-id", "email": "guest@local.com"}
+            else:
+                g.user = {"uid": "guest-user-id", "email": "guest@local.com"}
         else:
-            # Fallback for development before credentials key is attached
-            g.user = {"uid": "dev-user-id", "email": "dev@local.com"}
+            # Guest mode fallback when authentication is disabled
+            g.user = {"uid": "guest-user-id", "email": "guest@local.com"}
 
         # Ensure user profile document exists in Firestore
         if g.user and g.user.get("uid"):
@@ -136,7 +136,7 @@ def generate_title_if_needed(user_uid, conversation_id, user_message):
     if conv.get("title") in ["New Conversation", "New Chat", ""]:
         try:
             res = client.chat.completions.create(
-                model="llama-3.3-70b-versatile",
+                model=GROQ_MODEL,
                 messages=[
                     {"role": "system", "content": "You generate short chat titles. Respond ONLY with a 3 to 6 word concise title. Do NOT use quotes, punctuation, or preamble."},
                     {"role": "user", "content": f"Create a short title for a chat starting with: {user_message[:150]}"}
@@ -157,7 +157,7 @@ def update_summary_if_needed(user_uid, conversation_id):
         try:
             transcript = "\n".join([f"{m['role'].capitalize()}: {m['content']}" for m in messages[-16:]])
             res = client.chat.completions.create(
-                model="llama-3.3-70b-versatile",
+                model=GROQ_MODEL,
                 messages=[
                     {"role": "system", "content": "Summarize the key topics, user preferences, and goals discussed in this chat transcript in 2-3 concise sentences."},
                     {"role": "user", "content": transcript}
@@ -185,7 +185,7 @@ def extract_memory_safely(user_uid, user_message, assistant_reply):
 
     try:
         res = client.chat.completions.create(
-            model="llama-3.3-70b-versatile",
+            model=GROQ_MODEL,
             messages=[
                 {"role": "system", "content": (
                     "You are a memory extraction component. Analyze if the user statement contains long-term personal preferences, "
@@ -258,7 +258,7 @@ def chat():
     try:
         # 3. Call Groq API
         response = client.chat.completions.create(
-            model="llama-3.3-70b-versatile",
+            model=GROQ_MODEL,
             messages=messages_payload
         )
 
@@ -346,7 +346,7 @@ def regenerate_message():
 
     try:
         response = client.chat.completions.create(
-            model="llama-3.3-70b-versatile",
+            model=GROQ_MODEL,
             messages=messages_payload
         )
         bot_reply = response.choices[0].message.content
