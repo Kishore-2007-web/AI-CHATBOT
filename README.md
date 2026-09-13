@@ -1,163 +1,146 @@
-# AI Chatbot v2.0
+# Kisa AI Assistant v2.5
 
-A production-style full-stack AI web application featuring **Firebase Authentication**, **Cloud Firestore Database**, **Python Flask**, and **Groq AI**.
-
-> **Project Status:** 🚧 In Development (Version 2.0.0 - Phase 3: Firestore Database Architecture Complete)
+A production-grade, full-stack personal AI assistant featuring **Firebase Authentication**, **Cloud Firestore Database**, **Python Flask Backend**, **Groq AI (Llama 3.3 70B)**, persistent conversation memory, long-term user memory extraction, and a modern responsive dark UI.
 
 ---
 
-## Project Goal
+## 🌟 Key Features
 
-The purpose of this project is to build a scalable, secure AI chat platform featuring:
-
-* User Authentication (Email & Password via Firebase Auth)
-* Persistent Chat Database (Cloud Firestore)
-* Multi-conversation ChatGPT-style drawer & history management
-* Backend Security (Token verification & API key isolation)
-* Professional REST API communication (Python & Flask)
-* High-speed AI inference (Groq API with Llama 3.3 model)
-
----
-
-## Features
-
-### Version 2.0.0 (Phase 3 Complete)
-
-* **Cloud Firestore Database Layer**: Database service module ([db_service.py](file:///d:/from-c-drive/OneDrive/Desktop/AI%20chatbot/db_service.py)) for `users`, `conversations`, and `messages` collections
-* **Automatic Profile Creation**: Auto-syncing user profiles in Firestore upon authentication
-* **Audit Timestamps**: UTC ISO timestamps (`createdAt`, `updatedAt`) for document tracking
-* **Database Documentation**: Full schema specifications in [docs/Firestore-Structure.md](file:///d:/from-c-drive/OneDrive/Desktop/AI%20chatbot/docs/Firestore-Structure.md)
-
-### Version 2.0.0 (Phase 2 Complete)
-
-* **Firebase Authentication UI**: Email & Password Sign Up, Login, and Logout modal interface
-* **Session Persistence**: Automatic login state observer (`onAuthStateChanged`)
-* **Token Security**: ID Token transmission via `Authorization: Bearer <idToken>` HTTP header
-* **Flask Protection**: `@require_auth` middleware verifying ID Tokens with Firebase Admin SDK
-* **Documentation**: Comprehensive auth guide (`docs/Authentication.md`)
-
-### Version 2.0.0 (Phase 1 Complete)
-
-* Firebase Admin SDK initialization in Flask backend
-* Secure credential configuration via environment variables
-* Git protection for Firebase service keys
-* Diagnostic `/api/health` status route
-* Firebase setup documentation (`docs/Firebase.md`)
-
-
-### Version 1.0.0
-
-* AI Chatbot interface (HTML/CSS/JS)
-* Flask REST backend with Groq API integration
-* Markdown rendering & loading indicators
-
+* **🔐 Firebase User Authentication**: Email/Password Sign Up & Sign In, Google OAuth 2.0 Popup Sign-In, and session persistence (`onAuthStateChanged`).
+* **📁 Multi-Conversation Drawer**: ChatGPT-style sidebar grouped by date (*Today*, *Yesterday*, *Older*) with inline search, rename, and delete actions.
+* **🧠 Context Memory Engine**: Context Pipeline assembling `System Prompt + Relevant User Memories + Conversation Summary + Recent 20 Messages + Current Message`.
+* **💡 Automatic Title Generation**: Generates 3–6 word concise conversation titles on the first turn.
+* **📝 Conversation Summarization**: Auto-summarizes long discussions (>10 messages) to maintain historical context without overloading token limits.
+* **📌 Long-Term User Memory**: Extracts user preferences, skills, projects, and goals across chat sessions with safety filters (excludes passwords, tokens, API keys, and sensitive data).
+* **⚙️ Memory Management UI**: Dedicated Settings modal allowing users to view stored memories, delete individual items, clear all memories, or toggle memory extraction on/off.
+* **💻 Markdown & Code Highlighting**: Full Markdown parsing via `Marked.js`, syntax highlighting via `Highlight.js` (GitHub Dark theme), and 1-click **Copy Code** / **Copy Response** buttons.
+* **✏️ Message Editing & Response Regeneration**: Edit earlier user messages (with clean branch truncation) or regenerate assistant replies without duplicating messages.
+* **🔒 Production Data Security**: Enforces user data isolation on Flask backend (`@require_auth` verifying Firebase JWT ID tokens) and Firestore security rules (`firestore.rules`).
 
 ---
 
-## Technology Stack
+## 🏗️ Technology Stack
 
-### Frontend
-
-* HTML5
-* CSS3
-* JavaScript (ES6)
-
-### Backend
-
-* Python
-* Flask
-
-### AI
-
-* Groq API
-* Llama 3.3 70B Versatile
-
-### Development Tools
-
-* VS Code
-* Git
-* GitHub
+* **Frontend**: HTML5, CSS3 (Modern Glassmorphism Dark Theme), JavaScript (ES6 Modules), Marked.js, Highlight.js.
+* **Backend**: Python 3, Flask, Firebase Admin SDK.
+* **Database**: Cloud Firestore (`users`, `conversations`, `messages`, `memories` collections).
+* **AI Engine**: Groq API (`llama-3.3-70b-versatile`).
+* **Authentication**: Firebase Auth (Email/Password & Google Provider).
 
 ---
 
-## Project Structure
+## 📁 Project Structure
 
 ```text
 AI-Chatbot/
+├── app.py                     # Main Flask Application & REST API Endpoints
+├── db_service.py              # Database Service Layer (Firestore Operations)
+├── firestore.rules            # Production Firestore Security Rules
+├── requirements.txt           # Python Dependencies
+├── .env                       # Environment Variables (Secrets)
 │
-├── app.py
-├── requirements.txt
-├── .env
-├── .gitignore
-├── README.md
-├── LICENSE
+├── prompts/
+│   └── kisa_system_prompt.txt # Kisa AI Persona & System Instructions
 │
-├── docs/
 ├── static/
+│   ├── css/
+│   │   └── style.css          # Responsive Dark Glassmorphism Stylesheet
+│   └── js/
+│       ├── firebase-config.js # Firebase Web Client SDK Initialization
+│       ├── auth.js            # Auth Controllers & Session Observer
+│       ├── conversations.js   # Sidebar Conversation Manager
+│       ├── memory.js          # Settings & Long-Term Memory Controller
+│       └── script.js          # Main Chat UI, Markdown, Code Copy, Edit/Regen
+│
 ├── templates/
-├── tests/
-└── screenshots/
+│   └── index.html             # Main Single Page Application Layout
+│
+└── docs/                      # Technical Documentation Guides
 ```
 
 ---
 
-## Development Workflow
+## 🚀 REST API Specification
 
-1. Plan
-2. Document
-3. Develop
-4. Test
-5. Commit
-6. Push to GitHub
+### Authentication Header
+All protected endpoints require:
+`Authorization: Bearer <Firebase_ID_Token>`
+
+### Endpoints
+
+| Method | Endpoint | Description |
+| :--- | :--- | :--- |
+| `GET` | `/api/health` | Diagnostic status check for Firebase credentials |
+| `POST` | `/api/chat` | Send message & get AI reply (creates conversation if omitted) |
+| `POST` | `/api/chat/edit` | Edit user message & truncate subsequent history branch |
+| `POST` | `/api/chat/regenerate` | Regenerate last assistant reply |
+| `GET` | `/api/conversations` | List user's conversations ordered by `updatedAt` |
+| `POST` | `/api/conversations` | Create a new conversation |
+| `GET` | `/api/conversations/<id>` | Fetch single conversation details |
+| `PATCH` | `/api/conversations/<id>` | Rename conversation title |
+| `DELETE` | `/api/conversations/<id>` | Delete conversation and its messages |
+| `GET` | `/api/conversations/<id>/messages` | Fetch chronological message list for conversation |
+| `GET` | `/api/memories` | Fetch user's stored long-term memories |
+| `DELETE` | `/api/memories/<id>` | Delete single long-term memory |
+| `DELETE` | `/api/memories` | Clear all long-term memories for user |
+| `GET` | `/api/settings/memory` | Get user memory toggle settings |
+| `PATCH` | `/api/settings/memory` | Toggle memory extraction (`enabled: boolean`) |
 
 ---
 
-## Installation
+## ⚙️ Environment Variables Setup
 
-```bash
-git clone <repository-url>
+Create a `.env` file in the project root:
 
-cd AI-Chatbot
-
-python -m venv .venv
-
-# Windows
-.\.venv\Scripts\activate
-
-pip install -r requirements.txt
+```env
+GROQ_API_KEY=your_groq_api_key_here
+FIREBASE_CREDENTIALS_PATH=firebase-key.json
 ```
 
----
-
-## Current Version
-
-**v0.1.0**
-
-Status: Planning & Project Initialization
+> **Note**: Place your Firebase Admin SDK Service Account key at `firebase-key.json` in the root folder.
 
 ---
 
-## Roadmap
+## 💻 Local Development Setup
 
-* [x] Initialize repository
-* [x] Create folder structure
-* [x] Connect GitHub
-* [ ] Create Flask backend
-* [ ] Build frontend
-* [ ] Connect frontend to backend
-* [ ] Integrate Groq API
-* [ ] Improve UI
-* [ ] Add chat history
-* [ ] Deploy project
+1. **Clone Repository**:
+   ```bash
+   git clone <repository-url>
+   cd AI-Chatbot
+   ```
+
+2. **Setup Virtual Environment**:
+   ```bash
+   python -m venv .venv
+   
+   # Windows (PowerShell)
+   .\.venv\Scripts\activate
+   
+   # Linux/macOS
+   source .venv/bin/activate
+   ```
+
+3. **Install Dependencies**:
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+4. **Run Application**:
+   ```bash
+   python app.py
+   ```
+   Open [http://localhost:5000](http://localhost:5000) in your web browser.
 
 ---
 
-## License
+## 🛡️ Security & Privacy Notes
+
+1. **API Key Protection**: Groq API Key and Firebase Admin secret credentials are strictly server-side.
+2. **User Data Isolation**: Every Firestore query validates ownership (`userId == request.auth.uid`). Frontend-supplied user IDs are ignored; authenticated UID is derived directly from verified JWT tokens.
+3. **Memory Safety Filters**: Sensitive items (passwords, tokens, credentials, financial numbers) are strictly excluded from memory storage.
+
+---
+
+## 📄 License
 
 This project is licensed under the MIT License.
-
----
-
-## Author
-
-Developed as a learning project to understand modern full-stack web development and AI integration.

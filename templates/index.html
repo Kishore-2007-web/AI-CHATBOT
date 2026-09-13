@@ -4,46 +4,173 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kisa AI Chatbot</title>
+    <title>Kisa AI Assistant</title>
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Highlight.js Code Highlighting Theme -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
     <link rel="stylesheet" href="/static/css/style.css">
 </head>
 
 <body>
 
-    <div class="chat-container">
+    <div class="app-layout">
 
-        <!-- Top Header Bar -->
-        <div class="header">
-            <div class="header-brand">
-                <h1>Kisa AI</h1>
-                <span class="badge">v2.0</span>
+        <!-- Mobile Sidebar Overlay Backdrop -->
+        <div id="sidebar-backdrop" class="sidebar-backdrop hidden"></div>
+
+        <!-- Sidebar Drawer -->
+        <aside id="sidebar" class="sidebar">
+            <div class="sidebar-header">
+                <div class="brand">
+                    <span class="brand-icon">✨</span>
+                    <h2>Kisa AI</h2>
+                </div>
+                <button id="new-chat-btn" class="btn-new-chat">
+                    <span>+</span> New Chat
+                </button>
             </div>
-            
-            <!-- User Profile Bar -->
-            <div id="user-profile-bar" class="user-profile hidden">
-                <span class="user-avatar">👤</span>
-                <span id="user-email-display" class="user-email">user@example.com</span>
-                <button id="logout-btn" class="btn-logout">Logout</button>
+
+            <div class="sidebar-search">
+                <input id="conv-search-input" type="text" placeholder="Search conversations...">
+            </div>
+
+            <div id="conversation-list" class="conversation-list">
+                <!-- Grouped conversations rendered dynamically -->
+            </div>
+
+            <div class="sidebar-footer">
+                <button id="settings-btn" class="sidebar-footer-btn">
+                    <span>⚙️</span> Settings & Memory
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Workspace / Chat View -->
+        <main class="main-content">
+
+            <!-- Top Navigation Header -->
+            <header class="header">
+                <div class="header-left">
+                    <button id="sidebar-toggle-btn" class="btn-icon sidebar-toggle">
+                        ☰
+                    </button>
+                    <h1 id="chat-title-display">Kisa AI Assistant</h1>
+                    <span class="badge">v2.0</span>
+                </div>
+
+                <!-- User Profile Bar -->
+                <div id="user-profile-bar" class="user-profile hidden">
+                    <span class="user-avatar">👤</span>
+                    <span id="user-email-display" class="user-email">user@example.com</span>
+                    <button id="logout-btn" class="btn-logout">Logout</button>
+                </div>
+            </header>
+
+            <!-- Chat Container / Messages & Welcome State -->
+            <div class="chat-viewport">
+
+                <!-- Welcome Screen (When no active conversation messages) -->
+                <div id="welcome-screen" class="welcome-container">
+                    <div class="welcome-badge">AI Assistant</div>
+                    <h2>How can Kisa help you today?</h2>
+                    <p>Powered by Groq & Firebase with persistent context memory.</p>
+
+                    <div class="suggestions-grid">
+                        <button class="suggestion-chip" data-prompt="Explain quantum computing in simple terms.">
+                            <span class="icon">💡</span>
+                            <div>
+                                <strong>Explain a concept</strong>
+                                <span>Quantum computing simplified</span>
+                            </div>
+                        </button>
+                        <button class="suggestion-chip" data-prompt="Write a Python script to send HTTP requests with error handling.">
+                            <span class="icon">💻</span>
+                            <div>
+                                <strong>Help me write code</strong>
+                                <span>Python HTTP requests script</span>
+                            </div>
+                        </button>
+                        <button class="suggestion-chip" data-prompt="Help me plan a 4-week roadmap to learn React and Vite.">
+                            <span class="icon">🚀</span>
+                            <div>
+                                <strong>Plan a project</strong>
+                                <span>4-week React roadmap</span>
+                            </div>
+                        </button>
+                        <button class="suggestion-chip" data-prompt="How do I debug a Firebase authentication error in Web JavaScript?">
+                            <span class="icon">🛠️</span>
+                            <div>
+                                <strong>Debug an error</strong>
+                                <span>Firebase Auth troubleshooting</span>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Active Messages List -->
+                <div id="chat-box" class="chat-box hidden"></div>
+
+            </div>
+
+            <!-- Message Input Footer -->
+            <div class="input-area">
+                <div class="input-wrapper">
+                    <textarea id="user-input" rows="1" placeholder="Please sign in to chat..." disabled></textarea>
+                    <button id="send-btn" disabled>
+                        <span>Send</span>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="22" y1="2" x2="11" y2="13"></line>
+                            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                        </svg>
+                    </button>
+                </div>
+                <div class="input-disclaimer">Kisa can make mistakes. Verify important info.</div>
+            </div>
+
+        </main>
+
+    </div>
+
+    <!-- Settings & Memory Modal Overlay -->
+    <div id="settings-modal" class="modal-overlay hidden">
+        <div class="modal-card modal-lg">
+            <div class="modal-header">
+                <h2>Settings & Long-Term Memory</h2>
+                <button id="close-settings-btn" class="btn-close">&times;</button>
+            </div>
+
+            <div class="modal-body">
+                <!-- Memory Toggle Section -->
+                <div class="settings-section">
+                    <div class="setting-row">
+                        <div>
+                            <strong>Remember Useful Information</strong>
+                            <p class="setting-desc">Kisa will automatically extract useful preferences, ongoing projects, and skills across chat sessions.</p>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="memory-toggle" checked>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Saved Memories Section -->
+                <div class="settings-section">
+                    <div class="section-header">
+                        <h3>Saved User Memories</h3>
+                        <button id="clear-memories-btn" class="btn-danger-sm">Clear All Memories</button>
+                    </div>
+
+                    <div id="memories-list" class="memories-list">
+                        <!-- Memories rendered dynamically -->
+                        <div class="empty-memory-text">No long-term memories saved yet. Talk with Kisa to save preferences!</div>
+                    </div>
+                </div>
             </div>
         </div>
-
-        <!-- Chat Output Messages Container -->
-        <div id="chat-box">
-            <div class="message bot">
-                Hello! I am <strong>Kisa</strong>, your AI Assistant powered by Groq and Firebase. Please sign in to start chatting!
-            </div>
-        </div>
-
-        <!-- Message Input Area -->
-        <div class="input-area">
-            <input id="user-input" type="text" placeholder="Please sign in to chat..." disabled>
-            <button id="send-btn" disabled>Send</button>
-        </div>
-
     </div>
 
     <!-- Auth Modal Overlay -->
@@ -91,12 +218,15 @@
         </div>
     </div>
 
-    <!-- Markdown Parser -->
+    <!-- Markdown Parser & Highlight.js Syntax Highlighting -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
 
-    <!-- ES6 Application Scripts -->
+    <!-- ES6 Application Modules -->
     <script type="module" src="/static/js/firebase-config.js"></script>
     <script type="module" src="/static/js/auth.js"></script>
+    <script type="module" src="/static/js/conversations.js"></script>
+    <script type="module" src="/static/js/memory.js"></script>
     <script type="module" src="/static/js/script.js"></script>
 
 </body>

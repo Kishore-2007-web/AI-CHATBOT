@@ -7,6 +7,8 @@ import {
     signOut, 
     onAuthStateChanged 
 } from "./firebase-config.js";
+import { fetchUserConversations, createNewConversation } from "./conversations.js";
+import { fetchMemorySettings } from "./memory.js";
 
 let currentUser = null;
 
@@ -77,7 +79,7 @@ if (authForm) {
             passwordInput.value = "";
         } catch (error) {
             console.error("Auth Error:", error);
-            showError(getFriendlyErrorMessage(error.code));
+            showError(getFriendlyErrorMessage(error.code, error.message));
         } finally {
             authSubmitBtn.disabled = false;
             authSubmitBtn.textContent = isSignUpMode ? "Sign Up" : "Sign In";
@@ -97,7 +99,7 @@ if (googleSignInBtn) {
         } catch (error) {
             console.error("Google Auth Error:", error);
             if (error.code !== "auth/popup-closed-by-user") {
-                showError(getFriendlyErrorMessage(error.code));
+                showError(getFriendlyErrorMessage(error.code, error.message));
             }
         } finally {
             googleSignInBtn.disabled = false;
@@ -133,6 +135,10 @@ onAuthStateChanged(auth, (user) => {
         }
         if (sendBtn) sendBtn.disabled = false;
 
+        // Fetch conversations & memory settings for authenticated user
+        fetchUserConversations();
+        fetchMemorySettings();
+
         console.log("[Auth] User logged in:", user.email);
     } else {
         // User is logged out
@@ -147,6 +153,7 @@ onAuthStateChanged(auth, (user) => {
         }
         if (sendBtn) sendBtn.disabled = true;
 
+        createNewConversation();
         console.log("[Auth] User logged out.");
     }
 });
@@ -173,7 +180,7 @@ function showError(msg) {
     }
 }
 
-function getFriendlyErrorMessage(code) {
+function getFriendlyErrorMessage(code, rawMessage) {
     switch (code) {
         case "auth/email-already-in-use":
             return "This email is already registered. Please sign in.";
@@ -191,7 +198,13 @@ function getFriendlyErrorMessage(code) {
             return "An account already exists with the same email using a different sign-in method.";
         case "auth/too-many-requests":
             return "Too many failed attempts. Please try again later.";
+        case "auth/operation-not-allowed":
+            return "Sign-in method is not enabled in Firebase Console (Authentication -> Sign-in method).";
+        case "auth/unauthorized-domain":
+            return "Domain not authorized in Firebase Console. Try opening http://localhost:5000 instead of 127.0.0.1.";
+        case "auth/network-request-failed":
+            return "Network error. Please check your internet connection.";
         default:
-            return "Authentication failed. Please try again.";
+            return code ? `Authentication failed (${code}). Please check Firebase setup.` : (rawMessage || "Authentication failed. Please try again.");
     }
 }
