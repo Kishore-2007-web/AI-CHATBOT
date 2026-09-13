@@ -37,32 +37,30 @@ else:
 # Instantiate Database Service
 db_service = DatabaseService(db)
 
-# Authentication Middleware Decorator (Bypassed for Testing)
+# Authentication Middleware Decorator
 def require_auth(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         auth_header = request.headers.get("Authorization")
-        g.user = None
-
-        if auth_header and auth_header.startswith("Bearer "):
-            id_token = auth_header.split("Bearer ")[1].strip()
-            if firebase_initialized and id_token != "guest-token":
-                try:
-                    decoded_token = auth.verify_id_token(id_token)
-                    g.user = decoded_token
-                except Exception as e:
-                    print(f"[Auth Notice] Token verification bypassed for testing: {e}")
-
-        # Guest mode fallback when authentication is disabled
-        if not g.user or not g.user.get("uid"):
-            g.user = {"uid": "guest_user", "email": "guest@kisa.ai"}
-
-        # Ensure user profile document exists in Firestore
+        if not auth_header or not auth_header.startswith("Bearer "):
+            return jsonify({"error": "Unauthorized: Missing or invalid Authorization token."}), 401
+        
+        id_token = auth_header.split("Bearer ")[1].strip()
+        
         if firebase_initialized:
             try:
-                db_service.ensure_user_profile(g.user.get("uid"), g.user.get("email", ""))
+                decoded_token = auth.verify_id_token(id_token)
+                g.user = decoded_token
             except Exception as e:
-                print(f"[Firestore Notice] {e}")
+                print(f"[Auth Error] Token verification failed: {e}")
+                return jsonify({"error": "Unauthorized: Invalid or expired authentication token."}), 401
+        else:
+            # Fallback for local dev when firebase-key.json is not present
+            g.user = {"uid": "dev-user-id", "email": "dev@local.com"}
+
+        # Ensure user profile document exists in Firestore
+        if g.user and g.user.get("uid"):
+            db_service.ensure_user_profile(g.user.get("uid"), g.user.get("email", ""))
 
         return f(*args, **kwargs)
 

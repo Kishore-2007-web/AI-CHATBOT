@@ -1,19 +1,20 @@
 # Kisa AI Assistant v2.5
 
-A production-grade, full-stack personal AI assistant featuring **Firebase Authentication**, **Cloud Firestore Database**, **Python Flask Backend**, **Groq AI (Llama 3.3 70B)**, persistent conversation memory, long-term user memory extraction, and a modern responsive dark UI.
+A production-grade, full-stack personal AI assistant featuring **Firebase Authentication**, **Cloud Firestore Database**, **Python Flask Backend**, **Groq AI (`groq/compound`)**, persistent conversation memory, long-term user memory extraction, and a modern **pure monochrome glassmorphism UI**.
 
 ---
 
 ## 🌟 Key Features
 
 * **🔐 Firebase User Authentication**: Email/Password Sign Up & Sign In, Google OAuth 2.0 Popup Sign-In, and session persistence (`onAuthStateChanged`).
+* **🖤 Pure Monochrome Glassmorphism UI**: High-end futuristic black & white aesthetic with translucent glass panels, floating inputs, and custom syntax styling.
 * **📁 Multi-Conversation Drawer**: ChatGPT-style sidebar grouped by date (*Today*, *Yesterday*, *Older*) with inline search, rename, and delete actions.
 * **🧠 Context Memory Engine**: Context Pipeline assembling `System Prompt + Relevant User Memories + Conversation Summary + Recent 20 Messages + Current Message`.
 * **💡 Automatic Title Generation**: Generates 3–6 word concise conversation titles on the first turn.
 * **📝 Conversation Summarization**: Auto-summarizes long discussions (>10 messages) to maintain historical context without overloading token limits.
 * **📌 Long-Term User Memory**: Extracts user preferences, skills, projects, and goals across chat sessions with safety filters (excludes passwords, tokens, API keys, and sensitive data).
 * **⚙️ Memory Management UI**: Dedicated Settings modal allowing users to view stored memories, delete individual items, clear all memories, or toggle memory extraction on/off.
-* **💻 Markdown & Code Highlighting**: Full Markdown parsing via `Marked.js`, syntax highlighting via `Highlight.js` (GitHub Dark theme), and 1-click **Copy Code** / **Copy Response** buttons.
+* **💻 Markdown & Code Highlighting**: Full Markdown parsing via `Marked.js`, syntax highlighting via `Highlight.js` (Monochrome Theme), and 1-click **Copy Code** / **Copy Response** buttons.
 * **✏️ Message Editing & Response Regeneration**: Edit earlier user messages (with clean branch truncation) or regenerate assistant replies without duplicating messages.
 * **🔒 Production Data Security**: Enforces user data isolation on Flask backend (`@require_auth` verifying Firebase JWT ID tokens) and Firestore security rules (`firestore.rules`).
 
@@ -21,11 +22,11 @@ A production-grade, full-stack personal AI assistant featuring **Firebase Authen
 
 ## 🏗️ Technology Stack
 
-* **Frontend**: HTML5, CSS3 (Modern Glassmorphism Dark Theme), JavaScript (ES6 Modules), Marked.js, Highlight.js.
+* **Frontend**: HTML5, Vanilla CSS3 (Pure Monochrome Glassmorphism Design), JavaScript (ES6 Modules), Marked.js, Highlight.js.
 * **Backend**: Python 3, Flask, Firebase Admin SDK.
 * **Database**: Cloud Firestore (`users`, `conversations`, `messages`, `memories` collections).
-* **AI Engine**: Groq API (`llama-3.3-70b-versatile`).
-* **Authentication**: Firebase Auth (Email/Password & Google Provider).
+* **AI Engine**: Groq API (`groq/compound` model).
+* **Authentication**: Firebase Auth (Email/Password & Google OAuth Provider).
 
 ---
 
@@ -105,7 +106,7 @@ FIREBASE_CREDENTIALS_PATH=firebase-key.json
 
 1. **Clone Repository**:
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/Kishore-2007-web/AI-CHATBOT.git
    cd AI-Chatbot
    ```
 
