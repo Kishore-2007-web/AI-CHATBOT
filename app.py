@@ -11,28 +11,47 @@ from db_service import DatabaseService
 
 load_dotenv()
 
-app = Flask(__name__)
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+app = Flask(
+    __name__,
+    template_folder=os.path.join(BASE_DIR, "templates"),
+    static_folder=os.path.join(BASE_DIR, "static")
+)
 
 GROQ_MODEL = os.environ.get("GROQ_MODEL", "groq/compound")
 RECENT_MESSAGE_LIMIT = 20
 SUMMARY_THRESHOLD = 10
 
-# Initialize Firebase Admin SDK
-cred_path = os.environ.get("FIREBASE_CREDENTIALS_PATH", "firebase-key.json")
+# Initialize Firebase Admin SDK safely
+cred_path = os.environ.get("FIREBASE_CREDENTIALS_PATH", os.path.join(BASE_DIR, "firebase-key.json"))
+firebase_json_env = os.environ.get("FIREBASE_CREDENTIALS_JSON") or os.environ.get("FIREBASE_SERVICE_ACCOUNT")
 firebase_initialized = False
 db = None
 
-if os.path.exists(cred_path):
+if firebase_json_env:
+    try:
+        cred_dict = json.loads(firebase_json_env)
+        cred = credentials.Certificate(cred_dict)
+        firebase_admin.initialize_app(cred)
+        db = firestore.client()
+        firebase_initialized = True
+        print("[Firebase] Admin SDK initialized successfully from environment variable.")
+    except Exception as e:
+        print(f"[Firebase] Error initializing Admin SDK from env JSON: {e}")
+
+if not firebase_initialized and os.path.exists(cred_path):
     try:
         cred = credentials.Certificate(cred_path)
         firebase_admin.initialize_app(cred)
         db = firestore.client()
         firebase_initialized = True
-        print("[Firebase] Admin SDK initialized successfully.")
+        print("[Firebase] Admin SDK initialized successfully from file.")
     except Exception as e:
-        print(f"[Firebase] Error initializing Admin SDK: {e}")
-else:
-    print(f"[Firebase] Notice: Credentials file '{cred_path}' not found. Place your firebase-key.json in project root.")
+        print(f"[Firebase] Error initializing Admin SDK from file: {e}")
+
+if not firebase_initialized:
+    print(f"[Firebase] Notice: Credentials file '{cred_path}' not found and env variable empty.")
 
 # Instantiate Database Service
 db_service = DatabaseService(db)
@@ -55,7 +74,7 @@ def require_auth(f):
                 print(f"[Auth Error] Token verification failed: {e}")
                 return jsonify({"error": "Unauthorized: Invalid or expired authentication token."}), 401
         else:
-            # Fallback for local dev when firebase-key.json is not present
+            # Fallback for local dev when firebase credentials are not present
             g.user = {"uid": "dev-user-id", "email": "dev@local.com"}
 
         # Ensure user profile document exists in Firestore
@@ -67,13 +86,20 @@ def require_auth(f):
     return decorated_function
 
 
-client = Groq(
-    api_key=os.environ.get("GROQ_API_KEY")
-)
+def get_groq_client():
+    """Safely retrieves or instantiates Groq client without throwing on import if key is missing."""
+    api_key = os.environ.get("GROQ_API_KEY")
+    if not api_key:
+        return None
+    try:
+        return Groq(api_key=api_key)
+    except Exception as e:
+        print(f"[Groq Init Error] {e}")
+        return None
 
 
 def load_system_prompt():
-    prompt_path = os.path.join("prompts", "kisa_system_prompt.txt")
+    prompt_path = os.path.join(BASE_DIR, "prompts", "kisa_system_prompt.txt")
     if os.path.exists(prompt_path):
         with open(prompt_path, "r", encoding="utf-8") as file:
             return file.read()
@@ -134,6 +160,9 @@ def generate_title_if_needed(user_uid, conversation_id, user_message):
 
     # Generate if title is default
     if conv.get("title") in ["New Conversation", "New Chat", ""]:
+        client = get_groq_client()
+        if not client:
+            return
         try:
             res = client.chat.completions.create(
                 model=GROQ_MODEL,
@@ -154,6 +183,9 @@ def update_summary_if_needed(user_uid, conversation_id):
     """Updates conversation summary if message count exceeds threshold."""
     messages = db_service.get_conversation_messages(conversation_id, user_uid)
     if len(messages) >= SUMMARY_THRESHOLD and len(messages) % 6 == 0:
+        client = get_groq_client()
+        if not client:
+            return
         try:
             transcript = "\n".join([f"{m['role'].capitalize()}: {m['content']}" for m in messages[-16:]])
             res = client.chat.completions.create(
@@ -182,6 +214,10 @@ def extract_memory_safely(user_uid, user_message, assistant_reply):
     for pat in sensitive_patterns:
         if re.search(pat, user_message, re.IGNORECASE):
             return
+
+    client = get_groq_client()
+    if not client:
+        return
 
     try:
         res = client.chat.completions.create(
@@ -217,9 +253,11 @@ def home():
 
 @app.route("/api/health", methods=["GET"])
 def health_check():
+    client = get_groq_client()
     return jsonify({
         "status": "online",
         "firebase_connected": firebase_initialized,
+        "groq_configured": client is not None,
         "credentials_path": cred_path,
         "credentials_found": os.path.exists(cred_path)
     })
@@ -231,6 +269,10 @@ def health_check():
 @app.route("/api/chat", methods=["POST"])
 @require_auth
 def chat():
+    client = get_groq_client()
+    if not client:
+        return jsonify({"error": "AI service misconfigured: GROQ_API_KEY environment variable is not configured on the server."}), 500
+
     data = request.get_json() or {}
     user_message = data.get("message", "").strip()
     conversation_id = data.get("conversation_id")
@@ -313,6 +355,10 @@ def edit_message():
 @app.route("/api/chat/regenerate", methods=["POST"])
 @require_auth
 def regenerate_message():
+    client = get_groq_client()
+    if not client:
+        return jsonify({"error": "AI service misconfigured: GROQ_API_KEY environment variable is not configured on the server."}), 500
+
     data = request.get_json() or {}
     conversation_id = data.get("conversation_id")
     assistant_message_id = data.get("message_id")
