@@ -247,6 +247,8 @@ def extract_memory_safely(user_uid, user_message, assistant_reply):
 
 
 @app.route("/")
+@app.route("/api/index")
+@app.route("/api/index.py")
 def home():
     return render_template("index.html")
 
