@@ -32,7 +32,27 @@ const sendBtn = document.getElementById("send-btn");
 
 let isSignUpMode = false;
 
-// Handle Email/Password Form Submission
+// Mode Toggle Handler (Sign In <-> Sign Up)
+if (authToggleBtn) {
+    authToggleBtn.addEventListener("click", toggleAuthMode);
+}
+
+function toggleAuthMode() {
+    isSignUpMode = !isSignUpMode;
+    if (authError) authError.classList.add("hidden");
+
+    if (isSignUpMode) {
+        if (authTitle) authTitle.textContent = "Create an Account";
+        if (authSubmitBtn) authSubmitBtn.textContent = "Sign Up";
+        if (authToggleBtn) authToggleBtn.innerHTML = 'Already have an account? <span class="link">Sign In</span>';
+    } else {
+        if (authTitle) authTitle.textContent = "Welcome Back";
+        if (authSubmitBtn) authSubmitBtn.textContent = "Sign In";
+        if (authToggleBtn) authToggleBtn.innerHTML = 'Don\'t have an account? <span class="link">Sign Up</span>';
+    }
+}
+
+// Handle Email/Password Form Submission (Sign In & Sign Up)
 if (authForm) {
     authForm.addEventListener("submit", async (e) => {
         e.preventDefault();
@@ -44,25 +64,35 @@ if (authForm) {
             return;
         }
 
-        if (isSignUpMode) {
-            showError("Sign up is currently disabled. Please sign in with an existing account.");
-            return;
-        }
-
-        authError.classList.add("hidden");
+        if (authError) authError.classList.add("hidden");
         authSubmitBtn.disabled = true;
-        authSubmitBtn.textContent = "Signing In...";
 
-        try {
-            await signInWithEmailAndPassword(auth, email, password);
-            emailInput.value = "";
-            passwordInput.value = "";
-        } catch (error) {
-            console.error("Auth Error:", error);
-            showError(getFriendlyErrorMessage(error.code, error.message));
-        } finally {
-            authSubmitBtn.disabled = false;
-            authSubmitBtn.textContent = "Sign In";
+        if (isSignUpMode) {
+            authSubmitBtn.textContent = "Creating Account...";
+            try {
+                await createUserWithEmailAndPassword(auth, email, password);
+                emailInput.value = "";
+                passwordInput.value = "";
+            } catch (error) {
+                console.error("Sign-Up Error:", error);
+                showError(getFriendlyErrorMessage(error.code, error.message));
+            } finally {
+                authSubmitBtn.disabled = false;
+                authSubmitBtn.textContent = "Sign Up";
+            }
+        } else {
+            authSubmitBtn.textContent = "Signing In...";
+            try {
+                await signInWithEmailAndPassword(auth, email, password);
+                emailInput.value = "";
+                passwordInput.value = "";
+            } catch (error) {
+                console.error("Auth Error:", error);
+                showError(getFriendlyErrorMessage(error.code, error.message));
+            } finally {
+                authSubmitBtn.disabled = false;
+                authSubmitBtn.textContent = "Sign In";
+            }
         }
     });
 }
@@ -70,7 +100,7 @@ if (authForm) {
 // Handle Google OAuth Sign In
 if (googleSignInBtn) {
     googleSignInBtn.addEventListener("click", async () => {
-        authError.classList.add("hidden");
+        if (authError) authError.classList.add("hidden");
         googleSignInBtn.disabled = true;
 
         try {
@@ -138,22 +168,16 @@ onAuthStateChanged(auth, (user) => {
     }
 });
 
-// Helper: Get JWT ID Token for API requests (Guest Token Fallback)
+// Helper: Get JWT ID Token for API requests
 export async function getAuthToken() {
-    if (!currentUser) return "guest-token";
+    if (!currentUser) return null;
     try {
         return await currentUser.getIdToken();
     } catch (error) {
-        console.error("Failed to get ID token, using guest fallback:", error);
-        return "guest-token";
+        console.error("Failed to get ID token:", error);
+        return null;
     }
 }
-
-// Auto-initialize guest mode on page load
-document.addEventListener("DOMContentLoaded", () => {
-    fetchUserConversations();
-    fetchMemorySettings();
-});
 
 export function getCurrentUser() {
     return currentUser;
