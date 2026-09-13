@@ -32,27 +32,6 @@ const sendBtn = document.getElementById("send-btn");
 
 let isSignUpMode = false;
 
-// Toggle between Sign In and Sign Up mode
-function toggleAuthMode() {
-    isSignUpMode = !isSignUpMode;
-    authError.classList.add("hidden");
-    authError.textContent = "";
-
-    if (isSignUpMode) {
-        authTitle.textContent = "Create an Account";
-        authSubmitBtn.textContent = "Sign Up";
-        authToggleBtn.innerHTML = 'Already have an account? <span class="link">Sign In</span>';
-    } else {
-        authTitle.textContent = "Welcome Back";
-        authSubmitBtn.textContent = "Sign In";
-        authToggleBtn.innerHTML = 'Don\'t have an account? <span class="link">Sign Up</span>';
-    }
-}
-
-if (authToggleBtn) {
-    authToggleBtn.addEventListener("click", toggleAuthMode);
-}
-
 // Handle Email/Password Form Submission
 if (authForm) {
     authForm.addEventListener("submit", async (e) => {
@@ -65,16 +44,17 @@ if (authForm) {
             return;
         }
 
+        if (isSignUpMode) {
+            showError("Sign up is currently disabled. Please sign in with an existing account.");
+            return;
+        }
+
         authError.classList.add("hidden");
         authSubmitBtn.disabled = true;
-        authSubmitBtn.textContent = isSignUpMode ? "Creating Account..." : "Signing In...";
+        authSubmitBtn.textContent = "Signing In...";
 
         try {
-            if (isSignUpMode) {
-                await createUserWithEmailAndPassword(auth, email, password);
-            } else {
-                await signInWithEmailAndPassword(auth, email, password);
-            }
+            await signInWithEmailAndPassword(auth, email, password);
             emailInput.value = "";
             passwordInput.value = "";
         } catch (error) {
@@ -82,7 +62,7 @@ if (authForm) {
             showError(getFriendlyErrorMessage(error.code, error.message));
         } finally {
             authSubmitBtn.disabled = false;
-            authSubmitBtn.textContent = isSignUpMode ? "Sign Up" : "Sign In";
+            authSubmitBtn.textContent = "Sign In";
         }
     });
 }
