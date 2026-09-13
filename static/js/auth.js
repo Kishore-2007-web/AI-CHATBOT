@@ -128,7 +128,7 @@ if (logoutBtn) {
     });
 }
 
-// Auth State Observer
+// Auth State Observer (Bypassed for Guest Testing)
 onAuthStateChanged(auth, (user) => {
     currentUser = user;
 
@@ -137,6 +137,7 @@ onAuthStateChanged(auth, (user) => {
         if (authModal) authModal.classList.add("hidden");
         if (userProfileBar) userProfileBar.classList.remove("hidden");
         if (userEmailDisplay) userEmailDisplay.textContent = user.email || user.displayName || "Google User";
+        if (logoutBtn) logoutBtn.classList.remove("hidden");
 
         // Enable chat inputs
         if (userInput) {
@@ -145,39 +146,43 @@ onAuthStateChanged(auth, (user) => {
         }
         if (sendBtn) sendBtn.disabled = false;
 
-        // Fetch conversations & memory settings for authenticated user
         fetchUserConversations();
         fetchMemorySettings();
-
         console.log("[Auth] User logged in:", user.email);
     } else {
-        // User is logged out
-        if (authModal) authModal.classList.remove("hidden");
-        if (userProfileBar) userProfileBar.classList.add("hidden");
-        if (userEmailDisplay) userEmailDisplay.textContent = "";
+        // Guest mode active for testing
+        if (authModal) authModal.classList.add("hidden");
+        if (userProfileBar) userProfileBar.classList.remove("hidden");
+        if (userEmailDisplay) userEmailDisplay.textContent = "Guest User";
+        if (logoutBtn) logoutBtn.classList.add("hidden");
 
-        // Disable chat inputs
         if (userInput) {
-            userInput.disabled = true;
-            userInput.placeholder = "Please sign in to chat...";
+            userInput.disabled = false;
+            userInput.placeholder = "Message Kisa...";
         }
-        if (sendBtn) sendBtn.disabled = true;
+        if (sendBtn) sendBtn.disabled = false;
 
-        createNewConversation();
-        console.log("[Auth] User logged out.");
+        fetchUserConversations();
+        fetchMemorySettings();
+        console.log("[Auth] Guest mode active for testing.");
     }
 });
 
-// Helper: Get JWT ID Token for API requests
+// Helper: Get JWT ID Token for API requests (Fallback to guest-token for testing)
 export async function getAuthToken() {
-    if (!currentUser) return null;
+    if (!currentUser) return "guest-token";
     try {
         return await currentUser.getIdToken();
     } catch (error) {
-        console.error("Failed to get ID token:", error);
-        return null;
+        return "guest-token";
     }
 }
+
+// Auto-initialize guest mode on page load
+document.addEventListener("DOMContentLoaded", () => {
+    fetchUserConversations();
+    fetchMemorySettings();
+});
 
 export function getCurrentUser() {
     return currentUser;

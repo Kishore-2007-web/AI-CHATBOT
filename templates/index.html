@@ -62,10 +62,10 @@
                 </div>
 
                 <!-- User Profile Bar -->
-                <div id="user-profile-bar" class="user-profile hidden">
+                <div id="user-profile-bar" class="user-profile">
                     <span class="user-avatar">👤</span>
-                    <span id="user-email-display" class="user-email"></span>
-                    <button id="logout-btn" class="btn-logout">Logout</button>
+                    <span id="user-email-display" class="user-email">Guest User</span>
+                    <button id="logout-btn" class="btn-logout hidden">Logout</button>
                 </div>
             </header>
 
@@ -118,8 +118,8 @@
             <!-- Message Input Footer -->
             <div class="input-area">
                 <div class="input-wrapper">
-                    <textarea id="user-input" rows="1" placeholder="Please sign in to chat..." disabled></textarea>
-                    <button id="send-btn" disabled>
+                    <textarea id="user-input" rows="1" placeholder="Message Kisa..."></textarea>
+                    <button id="send-btn">
                         <span>Send</span>
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <line x1="22" y1="2" x2="11" y2="13"></line>
@@ -173,8 +173,8 @@
         </div>
     </div>
 
-    <!-- Auth Modal Overlay -->
-    <div id="auth-modal" class="modal-overlay">
+    <!-- Auth Modal Overlay (Disabled for testing) -->
+    <div id="auth-modal" class="modal-overlay hidden">
         <div class="modal-card">
             <div class="modal-header">
                 <h2 id="auth-title">Welcome Back</h2>
