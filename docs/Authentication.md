@@ -31,10 +31,11 @@ Flask Backend (@require_auth)
 
 ## 2. Frontend Configuration (`static/js/firebase-config.js` & `static/js/auth.js`)
 
-- **Config File**: `firebase-config.js` exports the initialized Firebase Web App and Auth module.
+- **Config File**: `firebase-config.js` exports the initialized Firebase Web App, Auth module, and GoogleAuthProvider.
 - **Auth Controller**: `auth.js` manages:
-  - Sign Up & Sign In toggle forms
-  - Error translation for invalid passwords/duplicate emails
+  - Email/Password Sign Up & Sign In forms
+  - **Google OAuth 2.0 Popup Sign In** via `signInWithPopup(auth, googleProvider)`
+  - Error translation for invalid passwords, duplicate emails, and closed popups
   - Persistent login state via `onAuthStateChanged`
   - Token acquisition helper `getAuthToken()`
 

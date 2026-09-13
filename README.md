@@ -2,7 +2,7 @@
 
 A production-style full-stack AI web application featuring **Firebase Authentication**, **Cloud Firestore Database**, **Python Flask**, and **Groq AI**.
 
-> **Project Status:** 🚧 In Development (Version 2.0.0 - Phase 2: Firebase Authentication Complete)
+> **Project Status:** 🚧 In Development (Version 2.0.0 - Phase 3: Firestore Database Architecture Complete)
 
 ---
 
@@ -20,6 +20,13 @@ The purpose of this project is to build a scalable, secure AI chat platform feat
 ---
 
 ## Features
+
+### Version 2.0.0 (Phase 3 Complete)
+
+* **Cloud Firestore Database Layer**: Database service module ([db_service.py](file:///d:/from-c-drive/OneDrive/Desktop/AI%20chatbot/db_service.py)) for `users`, `conversations`, and `messages` collections
+* **Automatic Profile Creation**: Auto-syncing user profiles in Firestore upon authentication
+* **Audit Timestamps**: UTC ISO timestamps (`createdAt`, `updatedAt`) for document tracking
+* **Database Documentation**: Full schema specifications in [docs/Firestore-Structure.md](file:///d:/from-c-drive/OneDrive/Desktop/AI%20chatbot/docs/Firestore-Structure.md)
 
 ### Version 2.0.0 (Phase 2 Complete)
 

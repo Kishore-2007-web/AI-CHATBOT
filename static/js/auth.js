@@ -1,7 +1,9 @@
 import { 
     auth, 
+    googleProvider,
     createUserWithEmailAndPassword, 
     signInWithEmailAndPassword, 
+    signInWithPopup,
     signOut, 
     onAuthStateChanged 
 } from "./firebase-config.js";
@@ -14,6 +16,7 @@ const authForm = document.getElementById("auth-form");
 const authTitle = document.getElementById("auth-title");
 const authSubmitBtn = document.getElementById("auth-submit-btn");
 const authToggleBtn = document.getElementById("auth-toggle-btn");
+const googleSignInBtn = document.getElementById("google-signin-btn");
 const authError = document.getElementById("auth-error");
 const emailInput = document.getElementById("auth-email");
 const passwordInput = document.getElementById("auth-password");
@@ -48,7 +51,7 @@ if (authToggleBtn) {
     authToggleBtn.addEventListener("click", toggleAuthMode);
 }
 
-// Handle Form Submission (Sign Up / Sign In)
+// Handle Email/Password Form Submission
 if (authForm) {
     authForm.addEventListener("submit", async (e) => {
         e.preventDefault();
@@ -70,7 +73,6 @@ if (authForm) {
             } else {
                 await signInWithEmailAndPassword(auth, email, password);
             }
-            // Clear inputs
             emailInput.value = "";
             passwordInput.value = "";
         } catch (error) {
@@ -79,6 +81,26 @@ if (authForm) {
         } finally {
             authSubmitBtn.disabled = false;
             authSubmitBtn.textContent = isSignUpMode ? "Sign Up" : "Sign In";
+        }
+    });
+}
+
+// Handle Google OAuth Sign In
+if (googleSignInBtn) {
+    googleSignInBtn.addEventListener("click", async () => {
+        authError.classList.add("hidden");
+        googleSignInBtn.disabled = true;
+
+        try {
+            console.log("[Auth] Initiating Google Sign In Popup...");
+            await signInWithPopup(auth, googleProvider);
+        } catch (error) {
+            console.error("Google Auth Error:", error);
+            if (error.code !== "auth/popup-closed-by-user") {
+                showError(getFriendlyErrorMessage(error.code));
+            }
+        } finally {
+            googleSignInBtn.disabled = false;
         }
     });
 }
@@ -102,7 +124,7 @@ onAuthStateChanged(auth, (user) => {
         // User is logged in
         if (authModal) authModal.classList.add("hidden");
         if (userProfileBar) userProfileBar.classList.remove("hidden");
-        if (userEmailDisplay) userEmailDisplay.textContent = user.email;
+        if (userEmailDisplay) userEmailDisplay.textContent = user.email || user.displayName || "Google User";
 
         // Enable chat inputs
         if (userInput) {
@@ -163,9 +185,13 @@ function getFriendlyErrorMessage(code) {
         case "auth/wrong-password":
         case "auth/invalid-credential":
             return "Invalid email or password.";
+        case "auth/popup-closed-by-user":
+            return "Google sign-in popup was closed.";
+        case "auth/account-exists-with-different-credential":
+            return "An account already exists with the same email using a different sign-in method.";
         case "auth/too-many-requests":
             return "Too many failed attempts. Please try again later.";
         default:
-            return "Authentication failed. Please check your credentials.";
+            return "Authentication failed. Please try again.";
     }
 }

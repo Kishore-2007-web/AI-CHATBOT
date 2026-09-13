@@ -26,8 +26,11 @@
 * [x] Document authentication architecture (`docs/Authentication.md`)
 
 ### Phase 3 – Firestore Database Architecture
-* [ ] Design & structure `users/`, `conversations/`, `messages/` collections
-* [ ] Backend document CRUD helpers with timestamps
+* [x] Design & structure `users/`, `conversations/`, `messages/` collections
+* [x] Backend document CRUD service helpers in Python (`db_service.py`)
+* [x] Auto-sync user profiles upon authentication
+* [x] Audit timestamps (`createdAt`, `updatedAt`) on all documents
+* [x] Document Firestore structure (`docs/Firestore-Structure.md` & `docs/Database.md`)
 
 ### Phase 4 – Multiple Conversations Management
 * [ ] ChatGPT-style sidebar / conversation list drawer

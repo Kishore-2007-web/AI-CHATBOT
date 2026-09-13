@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 from groq import Groq
 import firebase_admin
 from firebase_admin import credentials, firestore, auth
+from db_service import DatabaseService
 
 load_dotenv()
 
@@ -27,6 +28,9 @@ if os.path.exists(cred_path):
 else:
     print(f"[Firebase] Notice: Credentials file '{cred_path}' not found. Place your firebase-key.json in the project root.")
 
+# Instantiate Database Service
+db_service = DatabaseService(db)
+
 
 # Authentication Middleware Decorator
 def require_auth(f):
@@ -48,6 +52,10 @@ def require_auth(f):
         else:
             # Fallback for development before credentials key is attached
             g.user = {"uid": "dev-user-id", "email": "dev@local.com"}
+
+        # Ensure user profile document exists in Firestore
+        if g.user and g.user.get("uid"):
+            db_service.ensure_user_profile(g.user.get("uid"), g.user.get("email", ""))
 
         return f(*args, **kwargs)
 

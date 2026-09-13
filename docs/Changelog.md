@@ -1,3 +1,13 @@
+## v2.0.0-phase3 - Cloud Firestore Database Architecture (2026-08-04)
+
+### Added
+* Modular database service interface ([db_service.py](file:///d:/from-c-drive/OneDrive/Desktop/AI%20chatbot/db_service.py)) managing `users`, `conversations`, and `messages` Firestore collections
+* Automatic creation and timestamp audit for user profile documents on `@require_auth` requests in [app.py](file:///d:/from-c-drive/OneDrive/Desktop/AI%20chatbot/app.py)
+* Complete database schema, ER diagram, and query index specification in [docs/Firestore-Structure.md](file:///d:/from-c-drive/OneDrive/Desktop/AI%20chatbot/docs/Firestore-Structure.md)
+* Updated database overview in [docs/Database.md](file:///d:/from-c-drive/OneDrive/Desktop/AI%20chatbot/docs/Database.md)
+
+---
+
 ## v2.0.0-phase2 - Firebase Authentication (2026-08-04)
 
 ### Added
