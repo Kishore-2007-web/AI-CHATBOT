@@ -19,7 +19,7 @@ app = Flask(
     static_folder=os.path.join(BASE_DIR, "static")
 )
 
-GROQ_MODEL = os.environ.get("GROQ_MODEL", "groq/compound")
+GROQ_MODEL = os.environ.get("GROQ_MODEL", "qwen/qwen3.8-27b")
 RECENT_MESSAGE_LIMIT = 20
 SUMMARY_THRESHOLD = 10
 
